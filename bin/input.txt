@@ -1,0 +1,3 @@
+conus mhs mob
+ffname.list
+../../image

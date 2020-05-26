@@ -1,0 +1,2 @@
+swplot
+exit
