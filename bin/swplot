@@ -1,0 +1,24 @@
+#!/bin/bash
+
+
+if [ $# -ne 1 ];  then
+    echo "Format: $0 intput_file"
+    exit 1
+fi
+
+#echo $0
+
+fdn_cur=`pwd`
+#echo $fdn_cur
+
+path1=`dirname $0`
+path1=`cd $path1; pwd; cd $fdn_cur`
+#echo $path1
+
+export IDL_PATH="$path1:<IDL_DEFAULT>"
+#echo $IDL_PATH
+
+
+idl $path1/wrap < $1 2>&1 | tail -n +5 | grep -v "% Compiled"
+
+

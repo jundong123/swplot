@@ -8,6 +8,15 @@ pro swplot
 ;ffn_ilist = "ffname.list"
 ;odir = "."
 
+spawn, "pwd", fdn_cur
+print, fdn_cur
+
+ffn_sys=file_which("wrap.pro")
+fdn_sys=file_dirname(ffn_sys);
+print, fdn_sys
+;cd, fdn_sys
+
+
 ; read/redirect stdin
 line = ''
 
@@ -29,6 +38,8 @@ odir = line
 print, reg, " ", sen, " ", sat, " ", fimg
 print, ffn_ilist
 print, odir
+
+spawn, "mkdir -p " + odir
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -235,7 +246,7 @@ while ~eof(unit) do begin
 
 	sfr1 = make_array(ns[0], ns[1])
 	sfr1 = sfr1 * 0 - 99
-	r = call_external('i_cal_s3.so', 'i_cal_s3', nfov, nsl, $
+	r = call_external(fdn_sys+'/i_cal_s3.so', 'i_cal_s3', nfov, nsl, $
 			loni, lati, sfr, ns, s0, ds, sfr1)
 	;sfr1 = transpose(sfr1)
 	print, "min, max: ", min(sfr1), max(sfr1)
@@ -317,7 +328,7 @@ while ~eof(unit) do begin
 	; save image
 	png_file = odir + "/" + fn_pr + ".png"
 	tvlct, r, g, b, /get
-	write_png, png_file, tvrd(), r, g, b
+	write_png, fdn_cur+"/"+png_file, tvrd(), r, g, b
     print, "png_file: ", png_file
     print, ""
     print, ""
