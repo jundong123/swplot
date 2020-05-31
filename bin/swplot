@@ -19,6 +19,7 @@ export IDL_PATH="$path1:<IDL_DEFAULT>"
 #echo $IDL_PATH
 
 
-idl $path1/wrap < $1 2>&1 | tail -n +5 | grep -v "% Compiled"
+#idl $path1/wrap < $1 2>&1 | tail -n +5 | grep -v "% Compiled"
+idl $path1/wrap < $1 2>&1
 
 
