@@ -36,8 +36,8 @@ read, line, prompt="output folder: "
 odir = line
 
 print, reg, " ", sen, " ", sat, " ", fimg
-print, ffn_ilist
-print, odir
+print, "ffn_ilist: ", ffn_ilist
+print, "odir: ", odir
 
 spawn, "mkdir -p " + odir
 
@@ -326,10 +326,16 @@ while ~eof(unit) do begin
 
 
 	; save image
-	png_file = odir + "/" + fn_pr + ".png"
-	tvlct, r, g, b, /get
-	write_png, fdn_cur+"/"+png_file, tvrd(), r, g, b
+    print, "odir[0]: ", strmid(odir,0,1)
+    if (strcmp(strmid(odir,0,1),'/') eq 1) then begin
+	    png_file = odir + "/" + fn_pr + ".png"
+    endif else begin
+	    png_file = fdn_cur+"/"+odir + "/" + fn_pr + ".png"
+    endelse
     print, "png_file: ", png_file
+
+	tvlct, r, g, b, /get
+	write_png, png_file, tvrd(), r, g, b
     print, ""
     print, ""
 
