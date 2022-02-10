@@ -24,11 +24,21 @@ read, line, prompt="reg sen sat: "
 ss = strsplit(line, /extract, count=nss)
 print, "npara: ", nss
 reg = ss[0]  &  sen = ss[1]  &  sat = ss[2]
+fcom=0
 if (nss eq 3) then begin
     fimg = 0
 endif else if (nss eq 4) then begin
     fimg = fix(ss[3])
-endif
+endif else if (nss eq 11) then begin
+    fimg = fix(ss[3])
+    reg_box=[float(ss[4]),float(ss[5]),float(ss[6]),float(ss[7])]
+    nsdiv=[float(ss[8]),float(ss[9])]
+    fmap=fix(ss[10])
+    fcom=1
+endif else begin
+    print, "Wrong input"
+    exit
+endelse
 
 read, line, prompt="file name list file: "
 ffn_ilist = line
@@ -43,27 +53,28 @@ spawn, "mkdir -p " + odir
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; user modify: region and ndiv of axis
+; if not costimized (fcom==1), use pre-defined
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-if (strcmp(reg,'conus') eq 1) then begin
-    ; conus
-    reg_box = [-125.0, -65.0, 25.0, 50.0]
-    nsdiv = [12, 5]
-endif else if (strcmp(reg,'alaska') eq 1) then begin
-    ; alaska
-    reg_box=[-170.0, -130.0, 52.0, 72.0]
-    nsdiv = [8, 4]
-endif else if (strcmp(reg,'global') eq 1) then begin
-    ; global
-    reg_box = [-180.0, 180.0, -90.0, 90.0]
-    nsdiv = [12, 6]
-endif else begin
-    ; user define, global default
-    ;reg_box = [-90.0, -65.0, 34.0, 48.0]
-    ;nsdiv = [5, 7]
-    reg_box = [-180.0, 180.0, -90.0, 90.0]
-    nsdiv = [12, 6]
-endelse
+if (fcom eq 0) then begin
+    if (strcmp(reg,'conus') eq 1) then begin
+        ; conus
+        reg_box = [-125.0, -65.0, 25.0, 50.0]
+        nsdiv = [12, 5]
+    endif else if (strcmp(reg,'alaska') eq 1) then begin
+        ; alaska
+        reg_box=[-170.0, -130.0, 52.0, 72.0]
+        nsdiv = [8, 4]
+    endif else if (strcmp(reg,'global') eq 1) then begin
+        ; global
+        reg_box = [-180.0, 180.0, -90.0, 90.0]
+        nsdiv = [12, 6]
+    endif else begin
+        ; user define, global default
+        reg_box = [-180.0, 180.0, -90.0, 90.0]
+        nsdiv = [12, 6]
+    endelse
+    fmap=1100
+endif
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -143,7 +154,11 @@ while ~eof(unit) do begin
 	nfov=sz(1)
 	print, "nscan, nfov: ", nsl, nfov
 
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	; find data in region and time
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; input: lon, lat, reg_box, fimg; output: iscn0, iscn1
 	flag_in = 0;
 	for i1=0, nsl-1  do begin
 		ind = where(lon[i1,*] ge reg_box[0] and lon[i1,*] le reg_box[1] $
@@ -189,6 +204,8 @@ while ~eof(unit) do begin
 		print, "too few scanline"
 	    continue
 	endif
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 	;help
 	;lon = lon[iscn0:iscn1,*]
@@ -290,7 +307,21 @@ while ~eof(unit) do begin
 
 	TV, new, xstart, ystart, XSize=xsize, YSize=ysize
 
-	map_continents, /cont, /countries, /usa, color=ict_black
+    ; map
+    ;map_continents, /cont, /countries, /usa, color=ict_black
+    if (fmap/1000 eq 1) then begin
+	    map_continents, /cont, color=ict_black
+    endif
+    if ((fmap mod 1000)/100 eq 1) then begin
+	    map_continents, /countries, color=ict_black
+    endif
+    if ((fmap mod 100)/10 eq 1) then begin
+	    map_continents, /usa, color=ict_black
+    endif
+    if ((fmap mod 10)/1 eq 1) then begin
+	    ; plot counties, add later
+    endif
+
 	map_grid, lons=indgen(nsdiv[0]+1)*xdiv+reg_box[0], $
             lats=indgen(nsdiv[1]+1)*ydiv+reg_box[2], $
 			color=ict_black
