@@ -308,7 +308,7 @@ while ~eof(unit) do begin
 	TV, new, xstart, ystart, XSize=xsize, YSize=ysize
 
     ; map
-    ;map_continents, /cont, /countries, /usa, color=ict_black
+    map_continents, /cont, /countries, /usa, color=ict_black
     if (fmap/1000 eq 1) then begin
 	    map_continents, /cont, color=ict_black
     endif
